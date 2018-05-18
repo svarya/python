@@ -1,0 +1,75 @@
+---
+title: "Clustering"
+author: "Vivek kumar arya"
+date: "18 May 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r}
+library(dplyr)
+odi=read.csv("E:/ML/datasets-master/odi-batting.csv")
+odi$centuries=ifelse(odi$Runs>99,1,0)
+odi$ducks=ifelse(odi$Runs==0,1,0)
+odi$above_150=ifelse(odi$Runs>149,1,0)
+odi$fifties=ifelse(odi$Runs>49 & odi$Runs<100,1,0)
+odi$missed_centuries=ifelse(odi$Runs>90 & odi$Runs<100,1,0)
+View(odi)
+```
+
+```{r}
+players_summary = odi %>% group_by(Player) %>% summarise(
+  matches = n(),
+  total_runs=sum(Runs, na.rm=T),
+  avg_runs=mean(Runs, na.rm=T),
+  centuries=sum(centuries, na.rm=T),
+  ducks=sum(ducks, na.rm=T),
+  fifties=sum(fifties, na.rm=T),
+  above_150=sum(above_150, na.rm=T),
+  missed_centuries=sum(missed_centuries, na.rm=T)
+)
+View(players_summary)
+
+```
+
+```{r}
+library(BBmisc)
+odi_norm<-normalize(players_summary,method = 'range',range =  c(0,1))
+View(players_summary)
+```
+
+```{r}
+top_players=players_summary%>%arrange(-total_runs)%>%head(100)
+data_kmeans=top_players%>%select(-Player)
+odi_norm<-normalize(data_kmeans,method='range',range =  c(0,1))
+model_kmenas=kmeans(odi_norm, centers = 10)
+top_players$cluster=model_kmenas$cluster
+barplot(table(top_players$cluster))
+#View(odi_norm)
+```
+
+```{r}
+model_kmenas$centers
+```
+
+#within Square Sums
+```{r}
+model_kmenas$withinss
+```
+#between Square Sums
+```{r}
+model_kmenas$betweenss
+```
+
+```{r}
+
+```
+
